@@ -78,14 +78,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-sand-400/15">
           {/* Column 1: Brand Info & Emblem */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" className="inline-flex flex-col items-start gap-1 group">
               <img
                 src="/assets/canzir-logo.png"
                 alt="Canzir Logo"
-                className="h-10 w-auto brightness-110"
+                className="h-14 sm:h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
-              <span className="font-display text-2xl font-bold tracking-widest text-cream uppercase">
-                CANZIR
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#D8C0A0] font-sans font-medium">
+                Handmade Lighting Atelier
               </span>
             </Link>
             <p className="text-xs text-sand-300 leading-relaxed max-w-sm">

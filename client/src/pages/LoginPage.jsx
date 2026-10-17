@@ -36,9 +36,13 @@ const LoginPage = () => {
   return (
     <div className="max-w-md mx-auto px-4 py-16 sm:py-24">
       <div className="bg-cream p-8 sm:p-10 rounded-2xl border border-sand-300 shadow-md space-y-6">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <Link to="/" className="inline-block">
-            <img src="/assets/canzir-logo.png" alt="Canzir" className="h-10 mx-auto" />
+            <img
+              src="/assets/canzir-logo.png"
+              alt="Canzir"
+              className="h-16 sm:h-20 w-auto mx-auto object-contain transition-transform duration-300 hover:scale-105"
+            />
           </Link>
           <h1 className="font-display text-2xl font-bold text-walnut">Welcome Back</h1>
           <p className="text-xs text-sand-500">Sign in to track orders, manage addresses, and view your wishlist.</p>

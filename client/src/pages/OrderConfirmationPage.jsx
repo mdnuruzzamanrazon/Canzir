@@ -30,9 +30,16 @@ const OrderConfirmationPage = () => {
       {/* Order Summary Box */}
       <div className="bg-cream p-6 sm:p-8 rounded-2xl border border-sand-300 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-sand-200 gap-4">
-          <div>
-            <p className="text-xs text-sand-500 uppercase tracking-wider">Order Reference ID</p>
-            <p className="font-mono text-xl font-bold text-walnut mt-0.5">{orderNumber}</p>
+          <div className="flex items-center gap-3.5">
+            <img
+              src="/assets/canzir-logo.png"
+              alt="Canzir"
+              className="h-12 w-auto object-contain"
+            />
+            <div>
+              <p className="text-xs text-sand-500 uppercase tracking-wider">Order Reference ID</p>
+              <p className="font-mono text-xl font-bold text-walnut mt-0.5">{orderNumber}</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <button

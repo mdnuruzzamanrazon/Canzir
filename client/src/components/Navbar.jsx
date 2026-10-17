@@ -139,20 +139,15 @@ const Navbar = ({ onOpenSearch, onOpenQuiz }) => {
           </div>
 
           {/* Center Brand Identity (Logo) */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none py-1">
+          <Link to="/" className="flex flex-col items-center group focus:outline-none py-1">
             <img
               src="/assets/canzir-logo.png"
-              alt="Canzir"
-              className="h-10 sm:h-12 xl:h-14 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+              alt="Canzir Handmade Lighting"
+              className="h-12 sm:h-14 xl:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="flex flex-col">
-              <span className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-widest text-[#4A2E20] uppercase">
-                CANZIR
-              </span>
-              <span className="text-[9px] xl:text-[10px] uppercase tracking-[0.28em] text-[#AA885E] -mt-1 font-sans font-medium">
-                Handmade Lighting
-              </span>
-            </div>
+            <span className="text-[8px] sm:text-[9px] xl:text-[10px] uppercase tracking-[0.3em] text-[#AA885E] font-sans font-medium -mt-0.5">
+              Handmade Lighting
+            </span>
           </Link>
 
           {/* Right Action Icons & Utilities */}
@@ -353,11 +348,11 @@ const Navbar = ({ onOpenSearch, onOpenQuiz }) => {
                 <Link
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2"
+                  className="flex flex-col items-start"
                 >
-                  <img src="/assets/canzir-logo.png" alt="Canzir" className="h-8 w-auto" />
-                  <span className="font-display text-xl font-bold tracking-widest text-[#4A2E20] uppercase">
-                    CANZIR
+                  <img src="/assets/canzir-logo.png" alt="Canzir" className="h-10 w-auto object-contain" />
+                  <span className="text-[9px] uppercase tracking-[0.25em] text-[#AA885E] font-medium mt-0.5">
+                    Handmade Lighting
                   </span>
                 </Link>
                 <button

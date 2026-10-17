@@ -187,17 +187,26 @@ const AdminDashboard = () => {
     <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 sm:py-12 space-y-8">
       {/* Admin Top Header */}
       <div className="bg-walnut text-cream p-6 sm:p-8 lg:p-10 rounded-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2 text-bamboo text-xs font-semibold uppercase tracking-widest">
-            <ShieldCheck size={16} />
-            <span>Administrator Control Center</span>
+        <div className="flex items-center gap-5">
+          <Link to="/" title="View Storefront" className="flex-shrink-0">
+            <img
+              src="/assets/canzir-logo.png"
+              alt="Canzir"
+              className="h-14 sm:h-16 w-auto object-contain transition-transform duration-300 hover:scale-105"
+            />
+          </Link>
+          <div>
+            <div className="flex items-center gap-2 text-bamboo text-xs font-semibold uppercase tracking-widest">
+              <ShieldCheck size={16} />
+              <span>Administrator Control Center</span>
+            </div>
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-cream mt-0.5">
+              Canzir Atelier Management
+            </h1>
+            <p className="text-sm text-sand-300 mt-1">
+              Monitor incoming orders, inventory, custom bespoke lighting commissions, and customer messages.
+            </p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-cream mt-1">
-            Canzir Atelier Management
-          </h1>
-          <p className="text-sm text-sand-300 mt-1">
-            Monitor incoming orders, inventory, custom bespoke lighting commissions, and customer messages.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
