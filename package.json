@@ -1,0 +1,21 @@
+{
+  "name": "canzir-artisan-lighting",
+  "version": "1.0.0",
+  "description": "Canzir — Premium Handmade Lighting & Home Decor E-commerce Platform",
+  "scripts": {
+    "server": "node --prefix server server.js",
+    "client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "seed": "node --prefix server seed.js"
+  },
+  "keywords": [
+    "canzir",
+    "handcrafted",
+    "bamboo-lamps",
+    "lighting",
+    "home-decor",
+    "ecommerce"
+  ],
+  "author": "Canzir Atelier",
+  "license": "ISC"
+}

@@ -1,0 +1,145 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@theme {
+  --color-walnut: #4A2E20;
+  --color-walnut-50: #F9F6F3;
+  --color-walnut-100: #EFE7E2;
+  --color-walnut-200: #DFCFC5;
+  --color-walnut-300: #BFA493;
+  --color-walnut-400: #8A5D44;
+  --color-walnut-500: #5F3B29;
+  --color-walnut-600: #4A2E20;
+  --color-walnut-700: #3D251A;
+  --color-walnut-800: #2E1C13;
+  --color-walnut-900: #1F130D;
+
+  --color-sand: #D8C0A0;
+  --color-sand-50: #FAF7F3;
+  --color-sand-100: #F5EEE4;
+  --color-sand-200: #EBDDCB;
+  --color-sand-300: #D8C0A0;
+  --color-sand-400: #C4A57F;
+  --color-sand-500: #AA885E;
+
+  --color-bamboo: #C58B4B;
+  --color-bamboo-50: #FAF4EC;
+  --color-bamboo-100: #F4E7D6;
+  --color-bamboo-200: #E8CDAC;
+  --color-bamboo-300: #D9AF7D;
+  --color-bamboo-400: #C58B4B;
+  --color-bamboo-500: #A97033;
+  --color-bamboo-600: #8A5622;
+
+  --color-cream: #FAF6EF;
+  --color-cream-50: #FFFFFF;
+  --color-cream-100: #FDFBF7;
+  --color-cream-200: #FAF6EF;
+  --color-cream-300: #F4ECE0;
+  --color-cream-400: #EDE0CE;
+
+  --color-charcoal: #24211E;
+  --color-charcoal-50: #8A8580;
+  --color-charcoal-100: #524D48;
+  --color-charcoal-200: #3D3833;
+  --color-charcoal-300: #24211E;
+  --color-charcoal-400: #181614;
+  --color-charcoal-500: #0E0D0C;
+
+  --color-olive: #73795A;
+  --color-olive-50: #F5F6F2;
+  --color-olive-100: #E6E8DE;
+  --color-olive-200: #C8CCB8;
+  --color-olive-300: #9EA486;
+  --color-olive-400: #73795A;
+  --color-olive-500: #565B42;
+
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-bn: "Hind Siliguri", sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --background: #FAF6EF;
+  --foreground: #24211E;
+}
+
+body {
+  background-color: #FAF6EF;
+  color: #24211E;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Smooth Scrolling & Scrollbar */
+html {
+  scroll-behavior: smooth;
+  background-color: #FAF6EF;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF6EF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D8C0A0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C58B4B;
+}
+
+/* Luxury Editorial Typography Classes */
+.font-display {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-body {
+  font-family: 'Plus Jakarta Sans', Inter, sans-serif;
+}
+
+.font-bn {
+  font-family: 'Hind Siliguri', sans-serif;
+}
+
+/* Glassmorphism & Frosted Panels */
+.glass-panel {
+  background: rgba(250, 246, 239, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(216, 192, 160, 0.35);
+}
+
+.glass-panel-dark {
+  background: rgba(36, 33, 30, 0.90);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 139, 75, 0.25);
+}
+
+/* Ambient Warm Glow Effect */
+.ambient-glow {
+  position: relative;
+}
+.ambient-glow::after {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle, rgba(229, 155, 60, 0.18) 0%, rgba(250, 246, 239, 0) 70%);
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+}
+
+/* Text Selection */
+::selection {
+  background: #D8C0A0;
+  color: #24211E;
+}
