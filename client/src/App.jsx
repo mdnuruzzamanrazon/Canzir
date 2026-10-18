@@ -31,6 +31,7 @@ import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
+import LogoutModal from './components/LogoutModal';
 
 function AppContent() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function AppContent() {
             }
           />
         </Routes>
+        <LogoutModal />
       </div>
     );
   }
@@ -138,6 +140,7 @@ function AppContent() {
         isOpen={Boolean(quickViewProduct)}
         onClose={handleCloseQuickView}
       />
+      <LogoutModal />
     </div>
   );
 }

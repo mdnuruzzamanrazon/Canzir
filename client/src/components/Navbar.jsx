@@ -25,7 +25,7 @@ const Navbar = ({ onOpenSearch, onOpenQuiz }) => {
   const { lang, toggleLanguage, t } = useLanguage();
   const { currency, toggleCurrency } = useCurrency();
   const { totalItemCount, setIsCartOpen } = useCart();
-  const { user, wishlist, logout, isAdmin } = useAuth();
+  const { user, wishlist, logout, requestLogout, isAdmin } = useAuth();
   const { isPlaying, toggleSound } = useAudio();
   const navigate = useNavigate();
 
@@ -278,11 +278,10 @@ const Navbar = ({ onOpenSearch, onOpenQuiz }) => {
                       <div className="border-t border-[#D8C0A0]/30 mt-1 pt-1">
                         <button
                           onClick={() => {
-                            logout();
                             setUserDropdownOpen(false);
-                            navigate('/');
+                            requestLogout({ variant: 'customer', redirectUrl: '/login' });
                           }}
-                          className="w-full text-left px-4 py-2 text-xs text-red-700 hover:bg-red-50 transition-colors"
+                          className="w-full text-left px-4 py-2 text-xs text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
                         >
                           Sign Out
                         </button>
@@ -445,10 +444,10 @@ const Navbar = ({ onOpenSearch, onOpenQuiz }) => {
                   <p className="text-xs text-[#8A5D44]">Signed in as {user.name}</p>
                   <button
                     onClick={() => {
-                      logout();
                       setMobileMenuOpen(false);
+                      requestLogout({ variant: 'customer', redirectUrl: '/login' });
                     }}
-                    className="w-full mt-2 py-2 text-xs bg-[#D8C0A0]/40 text-[#4A2E20] rounded font-medium"
+                    className="w-full mt-2 py-2 text-xs bg-[#D8C0A0]/40 text-[#4A2E20] hover:bg-rose-100 hover:text-rose-700 rounded font-medium transition-colors cursor-pointer"
                   >
                     Sign Out
                   </button>

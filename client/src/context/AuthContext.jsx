@@ -26,6 +26,25 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
+  // Logout Confirmation Modal State
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [logoutModalConfig, setLogoutModalConfig] = useState({
+    variant: 'auto',
+    redirectUrl: '/login'
+  });
+
+  const requestLogout = useCallback((options = {}) => {
+    setLogoutModalConfig({
+      variant: options.variant || 'auto',
+      redirectUrl: options.redirectUrl || '/login'
+    });
+    setLogoutModalOpen(true);
+  }, []);
+
+  const closeLogoutModal = useCallback(() => {
+    setLogoutModalOpen(false);
+  }, []);
+
   // Explicit Logout function
   const logout = useCallback(async (callServer = true) => {
     if (callServer) {
@@ -192,6 +211,10 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
+      requestLogout,
+      logoutModalOpen,
+      logoutModalConfig,
+      closeLogoutModal,
       updateUser,
       wishlist,
       toggleWishlist,

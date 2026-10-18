@@ -19,7 +19,7 @@ import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 
 const AccountPage = ({ onQuickView }) => {
-  const { user, token, logout, wishlist, isInWishlist, loading: authLoading } = useAuth();
+  const { user, token, logout, requestLogout, wishlist, isInWishlist, loading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -142,11 +142,8 @@ const AccountPage = ({ onQuickView }) => {
         </div>
 
         <button
-          onClick={() => {
-            logout();
-            navigate('/');
-          }}
-          className="px-5 py-2.5 border border-sand-300 rounded-xl text-xs sm:text-sm text-sand-500 hover:text-red-700 hover:border-red-300 flex items-center gap-2 transition-colors w-fit"
+          onClick={() => requestLogout({ variant: 'customer', redirectUrl: '/login' })}
+          className="px-5 py-2.5 border border-sand-300 rounded-xl text-xs sm:text-sm text-sand-500 hover:text-red-700 hover:border-red-300 flex items-center gap-2 transition-colors w-fit cursor-pointer"
         >
           <LogOut size={16} />
           <span>Sign Out</span>

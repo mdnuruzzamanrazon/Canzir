@@ -48,7 +48,7 @@ import SettingsTab from './components/SettingsTab';
 import CreateManualOrderModal from './components/CreateManualOrderModal';
 
 export default function AdminDashboard() {
-  const { user, token, isAdmin, logout, loading: authLoading } = useAuth();
+  const { user, token, isAdmin, logout, requestLogout, loading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -570,9 +570,9 @@ export default function AdminDashboard() {
 
             {!sidebarCollapsed && (
               <button
-                onClick={async () => { await logout(); navigate('/login'); }}
+                onClick={() => requestLogout({ variant: 'admin', redirectUrl: '/login' })}
                 title="Logout"
-                className="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition"
+                className="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -599,9 +599,9 @@ export default function AdminDashboard() {
                 <ExternalLink className="w-3.5 h-3.5" />
               </Link>
               <button
-                onClick={async () => { await logout(); navigate('/login'); }}
+                onClick={() => requestLogout({ variant: 'admin', redirectUrl: '/login' })}
                 title="Logout"
-                className="p-2 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition"
+                className="p-2 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
