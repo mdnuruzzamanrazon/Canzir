@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { LanguageProvider } from './context/LanguageContext';
 import { CurrencyProvider } from './context/CurrencyContext';
@@ -31,6 +31,9 @@ import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 function AppContent() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
@@ -43,6 +46,17 @@ function AppContent() {
     setQuickViewProduct(null);
   };
 
+  if (isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-[#1c1917] text-[#fafaf9] font-body antialiased selection:bg-[#C58B4B]/30 selection:text-white">
+        <Routes>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/*" element={<AdminDashboard />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-cream text-charcoal font-body antialiased">
       {/* Primary Sticky Navbar */}
@@ -53,6 +67,7 @@ function AppContent() {
 
       {/* Main Page Routing */}
       <main className="flex-1">
+
         <Routes>
           <Route
             path="/"

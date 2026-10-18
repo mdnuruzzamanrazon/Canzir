@@ -6,7 +6,8 @@ import {
   updateProfile,
   changePassword,
   toggleWishlist,
-  getAllUsers
+  getAllUsers,
+  createStaffUser
 } from '../controllers/authController.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
@@ -19,5 +20,6 @@ router.put('/profile', protect, updateProfile);
 router.put('/change-password', protect, changePassword);
 router.post('/wishlist/toggle', protect, toggleWishlist);
 router.get('/users', protect, adminOnly, getAllUsers);
+router.post('/staff', protect, adminOnly, createStaffUser);
 
 export default router;

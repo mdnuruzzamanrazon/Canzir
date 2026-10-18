@@ -3,7 +3,8 @@ import {
   addReview,
   getProductReviews,
   getAllReviews,
-  updateReviewStatus
+  updateReviewStatus,
+  deleteReview
 } from '../controllers/reviewController.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
@@ -18,5 +19,6 @@ router.post('/', (req, res, next) => {
 router.get('/product/:productId', getProductReviews);
 router.get('/admin', protect, adminOnly, getAllReviews);
 router.put('/admin/:id', protect, adminOnly, updateReviewStatus);
+router.delete('/admin/:id', protect, adminOnly, deleteReview);
 
 export default router;

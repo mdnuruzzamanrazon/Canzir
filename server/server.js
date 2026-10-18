@@ -12,6 +12,7 @@ import customDesignRoutes from './routes/customDesignRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import inquiryRoutes from './routes/inquiryRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import questionRoutes from './routes/questionRoutes.js';
 import settingRoutes from './routes/settingRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 
@@ -55,6 +56,7 @@ app.use('/api/custom-designs', customDesignRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/questions', questionRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/upload', uploadRoutes);
 

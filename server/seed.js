@@ -6,6 +6,8 @@ import { Category } from './models/Category.js';
 import { Coupon } from './models/Coupon.js';
 import { Setting } from './models/Setting.js';
 import { Review } from './models/Review.js';
+import { Order } from './models/Order.js';
+import { Question } from './models/Question.js';
 
 dotenv.config();
 
@@ -503,7 +505,260 @@ const seedData = async () => {
     ]);
     console.log('[Seed] Coupons created: CANZIR10, NATUREWARMTH, WELCOME500');
 
-    // 6. Seed Settings
+    // 6. Clear & Seed Orders
+    await Order.deleteMany({});
+    await Question.deleteMany({});
+
+    const seededOrders = await Order.insertMany([
+      {
+        orderNumber: 'ORD000002',
+        user: customerUser._id,
+        customer: {
+          name: 'NZ RAZON',
+          email: 'nuruzzamanrazon62@gmail.com',
+          phone: '01893180667',
+          address: 'Choumatha, Barishal Sadar',
+          city: 'Barishal',
+          district: 'Barishal',
+          postalCode: '8200',
+          deliveryNotes: 'Please ring the doorbell and call 10 minutes prior to delivery.'
+        },
+        items: [
+          {
+            product: products[0]._id,
+            title: products[0].title,
+            image: products[0].images[0],
+            price: 4500,
+            quantity: 1,
+            selectedVariants: { Finish: 'Natural Riverbed Bamboo', Cord: '1.8m Braided Jute' }
+          }
+        ],
+        subtotal: 4500,
+        shippingFee: 150,
+        discountAmount: 450,
+        couponCode: 'CANZIR10',
+        totalAmount: 4200,
+        paymentMethod: 'cod',
+        paymentStatus: 'pending',
+        paymentDetails: {
+          channelName: 'Cash On Delivery',
+          provider: 'Cash on Delivery',
+          transactionId: '—',
+          expectedAmount: 4200,
+          receivedAmount: 0,
+          outstandingAmount: 4200,
+          courierCollected: false
+        },
+        orderStatus: 'Pending',
+        source: 'guest',
+        claim: {
+          claimToken: 'token_razon_002',
+          claimExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          claimStatus: 'email_sent'
+        },
+        internalNotes: [
+          {
+            note: 'Customer requested eco-friendly packaging for birthday gift.',
+            author: 'Admin',
+            createdAt: new Date(Date.now() - 3600000)
+          }
+        ],
+        statusHistory: [
+          {
+            status: 'Pending',
+            timestamp: new Date(Date.now() - 7200000),
+            note: 'Order placed by Guest checkout via Cash On Delivery',
+            author: 'System · Guest checkout'
+          }
+        ],
+        estimatedDelivery: '3 to 5 business days'
+      },
+      {
+        orderNumber: 'ORD000001',
+        user: customerUser._id,
+        customer: {
+          name: 'Ahsan Habib',
+          email: 'ahsan.habib@gmail.com',
+          phone: '01704428814',
+          address: 'House 18, Road 4, Sector 7, Uttara',
+          city: 'Dhaka',
+          district: 'Dhaka',
+          postalCode: '1230',
+          deliveryNotes: 'Deliver during afternoon office hours.'
+        },
+        items: [
+          {
+            product: products[1]._id,
+            title: products[1].title,
+            image: products[1].images[0],
+            price: 8800,
+            quantity: 1,
+            selectedVariants: { Finish: 'Smoked Walnut' }
+          }
+        ],
+        subtotal: 8800,
+        shippingFee: 0,
+        discountAmount: 500,
+        couponCode: 'WELCOME500',
+        totalAmount: 8300,
+        paymentMethod: 'bkash',
+        paymentStatus: 'paid',
+        paymentDetails: {
+          channelName: 'bKash Merchant Pay',
+          provider: 'bKash',
+          transactionId: 'BKS9823419082',
+          senderPhone: '01704428814',
+          expectedAmount: 8300,
+          receivedAmount: 8300,
+          outstandingAmount: 0,
+          courierCollected: false
+        },
+        orderStatus: 'Processing',
+        source: 'web',
+        claim: {
+          claimToken: 'token_ahsan_001',
+          claimExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          claimStatus: 'claimed'
+        },
+        internalNotes: [
+          {
+            note: 'bKash transaction BKS9823419082 confirmed in statement.',
+            author: 'Admin',
+            createdAt: new Date(Date.now() - 86400000)
+          }
+        ],
+        statusHistory: [
+          {
+            status: 'Processing',
+            timestamp: new Date(Date.now() - 43200000),
+            note: 'Master artisan assigned to assembly and wiring test',
+            author: 'Admin'
+          },
+          {
+            status: 'Confirmed',
+            timestamp: new Date(Date.now() - 86400000),
+            note: 'Payment verified and order confirmed',
+            author: 'Admin'
+          },
+          {
+            status: 'Pending',
+            timestamp: new Date(Date.now() - 90000000),
+            note: 'Order placed by Registered customer',
+            author: 'Customer · Ahsan Habib'
+          }
+        ],
+        estimatedDelivery: '1 to 2 business days'
+      },
+      {
+        orderNumber: 'CNZ-48762',
+        customer: {
+          name: 'Md. Sazzadur Rahman',
+          email: 'sazzadur@gmail.com',
+          phone: '01922740559',
+          address: 'Apartment 5B, Road 12, Dhanmondi',
+          city: 'Dhaka',
+          district: 'Dhaka',
+          postalCode: '1205',
+          deliveryNotes: 'Call security before gate entry.'
+        },
+        items: [
+          {
+            product: products[2]._id,
+            title: products[2].title,
+            image: products[2].images[0],
+            price: 3600,
+            quantity: 2,
+            selectedVariants: { Timber: 'Solid Burma Teak' }
+          }
+        ],
+        subtotal: 7200,
+        shippingFee: 0,
+        discountAmount: 0,
+        totalAmount: 7200,
+        paymentMethod: 'cod',
+        paymentStatus: 'verified',
+        paymentDetails: {
+          channelName: 'Cash On Delivery',
+          provider: 'Cash on Delivery',
+          transactionId: '—',
+          expectedAmount: 7200,
+          receivedAmount: 7200,
+          outstandingAmount: 0,
+          courierCollected: true,
+          courierName: 'Steadfast Courier',
+          courierRemittanceDate: new Date(Date.now() - 86400000)
+        },
+        orderStatus: 'Delivered',
+        source: 'manual',
+        trackingNumber: 'STF-8849201',
+        courierName: 'Steadfast Courier',
+        claim: {
+          claimToken: 'token_sazzad_003',
+          claimExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          claimStatus: 'claimed'
+        },
+        internalNotes: [
+          {
+            note: 'Delivered safely. Courier remittance of ৳7,200 received from Steadfast.',
+            author: 'Admin',
+            createdAt: new Date(Date.now() - 86400000)
+          }
+        ],
+        statusHistory: [
+          {
+            status: 'Delivered',
+            timestamp: new Date(Date.now() - 86400000),
+            note: 'Package signed and delivered by Steadfast courier',
+            author: 'Steadfast API'
+          },
+          {
+            status: 'Shipped',
+            timestamp: new Date(Date.now() - 172800000),
+            note: 'Dispatched via Steadfast Courier, Tracking: STF-8849201',
+            author: 'Admin'
+          }
+        ],
+        estimatedDelivery: 'Delivered'
+      }
+    ]);
+    console.log('[Seed] Orders created:', seededOrders.length);
+
+    // 7. Seed Questions (Q&A)
+    const seededQuestions = await Question.insertMany([
+      {
+        product: products[0]._id,
+        customerName: 'Kamrul Hasan',
+        customerEmail: 'kamrul.h@yahoo.com',
+        customerPhone: '01812345678',
+        question: 'Does the bamboo lamp come with the warm LED bulb included or do I need to buy it separately?',
+        answer: 'All Canzir lighting pieces arrive fully fitted with an artisanal E27 Warm Amber LED bulb (2200K) ready for immediate plug-and-play enjoyment.',
+        answeredBy: 'Canzir Concierge',
+        status: 'published'
+      },
+      {
+        product: products[1]._id,
+        customerName: 'Tasmia Sultana',
+        customerEmail: 'tasmia.s@gmail.com',
+        customerPhone: '01798765432',
+        question: 'Is the bamboo treated against moisture and insects?',
+        answer: 'Yes! Our riverbed bamboo undergoes a multi-week natural seasoning, non-toxic heat curing, and botanical sealing process to protect against humidity and insects for years.',
+        answeredBy: 'Master Artisan',
+        status: 'published'
+      },
+      {
+        product: products[2]._id,
+        customerName: 'Shakil Ahmed',
+        customerEmail: 'shakil.ahmed@outlook.com',
+        customerPhone: '01912987654',
+        question: 'Can you customize the hanging cord length to 3 meters for high duplex ceilings?',
+        answer: '',
+        answeredBy: '',
+        status: 'pending'
+      }
+    ]);
+    console.log('[Seed] Questions created:', seededQuestions.length);
+
+    // 8. Seed Settings
     await Setting.create({
       key: 'announcementBar',
       value: {
@@ -522,3 +777,4 @@ const seedData = async () => {
 };
 
 seedData();
+

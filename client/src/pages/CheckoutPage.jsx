@@ -106,6 +106,22 @@ const CheckoutPage = () => {
       });
 
       if (res.success && res.order) {
+        // Record in local order history for Quick Select
+        try {
+          const rawHistory = localStorage.getItem('canzir_my_orders');
+          const history = rawHistory ? JSON.parse(rawHistory) : [];
+          const newEntry = {
+            orderNumber: res.order.orderNumber,
+            orderStatus: res.order.orderStatus || 'Pending',
+            createdAt: res.order.createdAt || new Date().toISOString(),
+            firstItemTitle: res.order.items?.[0]?.title || 'Artisan Fixture'
+          };
+          const updated = [newEntry, ...history.filter(o => (typeof o === 'string' ? o : o.orderNumber) !== res.order.orderNumber)];
+          localStorage.setItem('canzir_my_orders', JSON.stringify(updated.slice(0, 10)));
+        } catch (e) {
+          console.warn('Could not store order in localStorage:', e);
+        }
+
         // Trigger celebratory confetti
         confetti({
           particleCount: 80,
