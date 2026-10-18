@@ -29,6 +29,8 @@ import AccountPage from './pages/AccountPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRoute from './components/AdminRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const location = useLocation();
@@ -48,10 +50,24 @@ function AppContent() {
 
   if (isAdminRoute) {
     return (
-      <div className="min-h-screen bg-[#1c1917] text-[#fafaf9] font-body antialiased selection:bg-[#C58B4B]/30 selection:text-white">
+      <div className="min-h-screen bg-[#12100E] text-[#fafaf9] font-body antialiased selection:bg-[#C58B4B]/30 selection:text-white">
         <Routes>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/*"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </div>
     );
@@ -89,11 +105,24 @@ function AppContent() {
           <Route path="/track-order" element={<TrackOrderPage />} />
           <Route path="/story" element={<AboutPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/account" element={<AccountPage onQuickView={handleOpenQuickView} />} />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <AccountPage onQuickView={handleOpenQuickView} />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </main>
 

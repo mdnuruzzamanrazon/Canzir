@@ -1,46 +1,132 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import apiFetch from '../utils/api.js';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Synchronously hydrate initial user and token from localStorage to prevent auth flashes on refresh
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('canzir_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [token, setToken] = useState(() => localStorage.getItem('canzir_token'));
   const [loading, setLoading] = useState(true);
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('canzir_user');
+      const u = savedUser ? JSON.parse(savedUser) : null;
+      return u?.wishlist?.map(item => item._id || item) || [];
+    } catch {
+      return [];
+    }
+  });
 
+  // Explicit Logout function
+  const logout = useCallback(async (callServer = true) => {
+    if (callServer) {
+      try {
+        await apiFetch('/auth/logout', { method: 'POST' });
+      } catch (err) {
+        // Silently catch network errors during logout
+      }
+    }
+    localStorage.removeItem('canzir_token');
+    localStorage.removeItem('canzir_user');
+    setToken(null);
+    setUser(null);
+    setWishlist([]);
+  }, []);
+
+  // Update user profile and keep localStorage in sync
+  const updateUser = useCallback((updatedUserData) => {
+    setUser(updatedUserData);
+    try {
+      localStorage.setItem('canzir_user', JSON.stringify(updatedUserData));
+    } catch (e) {
+      console.error('Failed to cache user profile in localStorage:', e);
+    }
+  }, []);
+
+  // Session verification on app boot / page refresh
   useEffect(() => {
-    const fetchUser = async () => {
-      if (token) {
+    let isMounted = true;
+
+    const verifySession = async () => {
+      const storedToken = localStorage.getItem('canzir_token');
+      const storedUser = localStorage.getItem('canzir_user');
+
+      // Check with backend if there is any stored token, cached user, or browser cookie
+      if (storedToken || storedUser) {
         try {
           const res = await apiFetch('/auth/profile');
+          if (!isMounted) return;
+
           if (res.success && res.user) {
             setUser(res.user);
+            localStorage.setItem('canzir_user', JSON.stringify(res.user));
+            if (res.token) {
+              localStorage.setItem('canzir_token', res.token);
+              setToken(res.token);
+            }
             setWishlist(res.user.wishlist?.map(item => item._id || item) || []);
           } else {
-            logout();
+            // Invalid session response
+            await logout(false);
           }
         } catch (err) {
-          console.warn('Session expired or network issue:', err.message);
-          logout();
+          if (!isMounted) return;
+
+          // Only clear session if server explicitly returned 401 Unauthorized or 403 Forbidden
+          if (err.status === 401 || err.status === 403) {
+            console.warn('[Auth] Session expired or unauthorized (HTTP 401/403). Resetting session.');
+            await logout(false);
+          } else {
+            // Retain cached session on transient offline / network failures
+            console.warn('[Auth] Network issue verifying session. Retaining local session state:', err.message);
+          }
         }
       }
-      setLoading(false);
+
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
-    fetchUser();
-  }, [token]);
+    verifySession();
+
+    // Listen for global 401 session expiration events from apiFetch
+    const handleSessionExpired = () => {
+      console.warn('[Auth] Received global session expired event.');
+      logout(false);
+    };
+
+    window.addEventListener('canzir_session_expired', handleSessionExpired);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('canzir_session_expired', handleSessionExpired);
+    };
+  }, [logout]);
 
   const login = async (email, password) => {
     const res = await apiFetch('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password })
     });
-    if (res.success && res.token) {
-      localStorage.setItem('canzir_token', res.token);
-      setToken(res.token);
+
+    if (res.success && res.user) {
+      if (res.token) {
+        localStorage.setItem('canzir_token', res.token);
+        setToken(res.token);
+      }
+      localStorage.setItem('canzir_user', JSON.stringify(res.user));
       setUser(res.user);
-      setWishlist(res.user.wishlist || []);
+      setWishlist(res.user.wishlist?.map(item => item._id || item) || []);
       return res.user;
     }
     throw new Error(res.message || 'Login failed');
@@ -51,21 +137,18 @@ export const AuthProvider = ({ children }) => {
       method: 'POST',
       body: JSON.stringify({ name, email, password, phone })
     });
-    if (res.success && res.token) {
-      localStorage.setItem('canzir_token', res.token);
-      setToken(res.token);
+
+    if (res.success && res.user) {
+      if (res.token) {
+        localStorage.setItem('canzir_token', res.token);
+        setToken(res.token);
+      }
+      localStorage.setItem('canzir_user', JSON.stringify(res.user));
       setUser(res.user);
-      setWishlist(res.user.wishlist || []);
+      setWishlist(res.user.wishlist?.map(item => item._id || item) || []);
       return res.user;
     }
     throw new Error(res.message || 'Registration failed');
-  };
-
-  const logout = () => {
-    localStorage.removeItem('canzir_token');
-    setToken(null);
-    setUser(null);
-    setWishlist([]);
   };
 
   const toggleWishlist = async (productId) => {
@@ -104,10 +187,12 @@ export const AuthProvider = ({ children }) => {
       user,
       token,
       loading,
+      isAuthReady: !loading,
       isAdmin,
       login,
       register,
       logout,
+      updateUser,
       wishlist,
       toggleWishlist,
       isInWishlist,
@@ -119,3 +204,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+

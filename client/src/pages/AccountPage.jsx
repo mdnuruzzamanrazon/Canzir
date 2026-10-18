@@ -19,7 +19,7 @@ import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 
 const AccountPage = ({ onQuickView }) => {
-  const { user, token, logout, wishlist, isInWishlist } = useAuth();
+  const { user, token, logout, wishlist, isInWishlist, loading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -43,7 +43,9 @@ const AccountPage = ({ onQuickView }) => {
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
-    if (!token) {
+    if (authLoading && !user) return;
+
+    if (!authLoading && !token && !user) {
       navigate('/login');
       return;
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -48,12 +48,37 @@ import SettingsTab from './components/SettingsTab';
 import CreateManualOrderModal from './components/CreateManualOrderModal';
 
 export default function AdminDashboard() {
-  const { user, token, isAdmin, logout } = useAuth();
+  const { user, token, isAdmin, logout, loading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Navigation State
-  const [activeTab, setActiveTab] = useState('overview');
+  // Navigation State with URL Parameter Synchronization
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = new URLSearchParams(window.location.search).get('tab');
+    const validTabs = [
+      'overview', 'orders', 'payments', 'products', 'categories',
+      'variants', 'inventory', 'customers', 'content', 'reviews',
+      'questions', 'banners', 'settings', 'payment-channels',
+      'delivery-rules', 'staff', 'email-settings'
+    ];
+    return validTabs.includes(tabParam) ? tabParam : 'overview';
+  });
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId }, { replace: true });
+    setSidebarOpen(false);
+  };
+
+  // Keep state synchronized if user navigates back/forward in browser history
+  useEffect(() => {
+    const urlTab = searchParams.get('tab');
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+  }, [searchParams]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -79,25 +104,34 @@ export default function AdminDashboard() {
   // Manual Order Modal State
   const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
-  // Check Auth
+  // Safe Session Verification & Data Fetching
   useEffect(() => {
-    if (!token || !isAdmin) {
-      navigate('/login');
+    // 1. Wait until initial session verification finishes
+    if (authLoading && !user) return;
+
+    // 2. Only redirect if verification completed and user is missing or not admin
+    if (!authLoading && (!user || !isAdmin)) {
+      navigate('/login', { replace: true });
       return;
     }
-    loadAllAdminData();
-  }, [token, isAdmin]);
+
+    // 3. Authenticated Admin Session Active: load dashboard data
+    if (user && isAdmin) {
+      loadAllAdminData();
+    }
+  }, [user, isAdmin, authLoading]);
 
   // Real-time Auto-Sync Interval (Every 15 seconds)
   useEffect(() => {
-    if (!token || !isAdmin || !autoSync) return;
+    if (!user || !isAdmin || !autoSync) return;
 
     const interval = setInterval(() => {
       fetchRealtimeUpdates();
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [token, isAdmin, autoSync]);
+  }, [user, isAdmin, autoSync]);
+
 
   // Initial Full Load
   const loadAllAdminData = async () => {
@@ -169,11 +203,11 @@ export default function AdminDashboard() {
 
   const handleOpenOrder = (ord) => {
     setSelectedOrder(ord);
-    setActiveTab('orders');
+    handleTabChange('orders');
   };
 
   const handleOpenPayment = (ord) => {
-    setActiveTab('payments');
+    handleTabChange('payments');
   };
 
   const handleOrderCreated = (newOrder) => {
@@ -277,7 +311,7 @@ export default function AdminDashboard() {
                 </span>
               )}
               <button
-                onClick={() => { setActiveTab('overview'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('overview')}
                 title={sidebarCollapsed ? 'Dashboard' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all ${
                   activeTab === 'overview'
@@ -300,7 +334,7 @@ export default function AdminDashboard() {
                 </span>
               )}
               <button
-                onClick={() => { setActiveTab('orders'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('orders')}
                 title={sidebarCollapsed ? 'Orders' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all relative ${
                   activeTab === 'orders'
@@ -324,7 +358,7 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                onClick={() => { setActiveTab('payments'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('payments')}
                 title={sidebarCollapsed ? 'Payments' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all relative ${
                   activeTab === 'payments'
@@ -356,7 +390,7 @@ export default function AdminDashboard() {
                 </span>
               )}
               <button
-                onClick={() => { setActiveTab('products'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('products')}
                 title={sidebarCollapsed ? 'Products' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all ${
                   activeTab === 'products'
@@ -374,7 +408,7 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                onClick={() => { setActiveTab('categories'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('categories')}
                 title={sidebarCollapsed ? 'Categories' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all ${
                   activeTab === 'categories'
@@ -392,7 +426,7 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                onClick={() => { setActiveTab('variants'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('variants')}
                 title={sidebarCollapsed ? 'Variants' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all ${
                   activeTab === 'variants'
@@ -407,7 +441,7 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                onClick={() => { setActiveTab('inventory'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('inventory')}
                 title={sidebarCollapsed ? 'Inventory' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all relative ${
                   activeTab === 'inventory'
@@ -439,7 +473,7 @@ export default function AdminDashboard() {
                 </span>
               )}
               <button
-                onClick={() => { setActiveTab('customers'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('customers')}
                 title={sidebarCollapsed ? 'Customers' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all ${
                   activeTab === 'customers'
@@ -465,7 +499,7 @@ export default function AdminDashboard() {
                 </span>
               )}
               <button
-                onClick={() => { setActiveTab('content'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('content')}
                 title={sidebarCollapsed ? 'Reviews & Q&A' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all relative ${
                   activeTab === 'content'
@@ -497,7 +531,7 @@ export default function AdminDashboard() {
                 </span>
               )}
               <button
-                onClick={() => { setActiveTab('settings'); setSidebarOpen(false); }}
+                onClick={() => handleTabChange('settings')}
                 title={sidebarCollapsed ? 'Store Settings' : ''}
                 className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-medium transition-all ${
                   activeTab === 'settings'
@@ -536,7 +570,7 @@ export default function AdminDashboard() {
 
             {!sidebarCollapsed && (
               <button
-                onClick={() => { logout(); navigate('/login'); }}
+                onClick={async () => { await logout(); navigate('/login'); }}
                 title="Logout"
                 className="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition"
               >
@@ -565,7 +599,7 @@ export default function AdminDashboard() {
                 <ExternalLink className="w-3.5 h-3.5" />
               </Link>
               <button
-                onClick={() => { logout(); navigate('/login'); }}
+                onClick={async () => { await logout(); navigate('/login'); }}
                 title="Logout"
                 className="p-2 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition"
               >
@@ -633,7 +667,7 @@ export default function AdminDashboard() {
             {/* Add Product Button */}
             <button
               onClick={() => {
-                setActiveTab('products');
+                handleTabChange('products');
                 setTimeout(() => {
                   window.dispatchEvent(new CustomEvent('canzir-open-add-product'));
                 }, 50);

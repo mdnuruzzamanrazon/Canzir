@@ -15,13 +15,26 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   const res = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
-    headers
+    headers,
+    credentials: 'include' // Transmit HTTP-only cookies across requests
   });
 
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new Error(data.message || `Request failed with status ${res.status}`);
+    const error = new Error(data.message || `Request failed with status ${res.status}`);
+    error.status = res.status;
+    error.code = data.code;
+    error.data = data;
+
+    // If 401 unauthorized and not during a login/register attempt, notify session expiration
+    if (res.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('canzir_session_expired', { detail: { message: data.message } }));
+      }
+    }
+
+    throw error;
   }
 
   return data;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -7,31 +7,49 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/account';
+
+  // Compute return URL preserving any search parameters
+  const targetUrl = location.state?.from
+    ? (location.state.from.pathname + (location.state.from.search || ''))
+    : null;
+
+  // Auto-redirect if user already has an active authenticated session
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (isAdmin) {
+        navigate(targetUrl && targetUrl.startsWith('/admin') ? targetUrl : '/admin', { replace: true });
+      } else {
+        navigate(targetUrl && !targetUrl.startsWith('/admin') ? targetUrl : '/account', { replace: true });
+      }
+    }
+  }, [user, isAdmin, authLoading, navigate, targetUrl]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-    setLoading(true);
+    setSubmitting(true);
 
     try {
-      const user = await login(email, password);
-      if (user.role === 'admin') {
-        navigate('/admin');
+      const loggedUser = await login(email, password);
+      if (loggedUser.role === 'admin') {
+        const dest = targetUrl && targetUrl.startsWith('/admin') ? targetUrl : '/admin';
+        navigate(dest, { replace: true });
       } else {
-        navigate(from, { replace: true });
+        const dest = targetUrl && !targetUrl.startsWith('/admin') ? targetUrl : '/account';
+        navigate(dest, { replace: true });
       }
     } catch (err) {
       setErrorMsg(err.message || 'Invalid email or password');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
 
   return (
     <div className="max-w-md mx-auto px-4 py-16 sm:py-24">
@@ -95,10 +113,10 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitting}
             className="w-full py-3 bg-walnut hover:bg-walnut-700 text-cream font-semibold rounded text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
           >
-            <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+            <span>{submitting ? 'Authenticating...' : 'Sign In'}</span>
             <ArrowRight size={14} />
           </button>
         </form>
