@@ -13,7 +13,8 @@ import {
   deleteOrder,
   getCustomers,
   getAllPayments,
-  getOrderStats
+  getOrderStats,
+  getSalesAnalytics
 } from '../controllers/orderController.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
@@ -33,6 +34,7 @@ router.get('/my', protect, getMyOrders);
 // Admin Operations
 router.get('/admin/all', protect, adminOnly, getAllOrders);
 router.get('/admin/stats', protect, adminOnly, getOrderStats);
+router.get('/admin/analytics', protect, adminOnly, getSalesAnalytics);
 router.get('/admin/customers', protect, adminOnly, getCustomers);
 router.get('/admin/payments', protect, adminOnly, getAllPayments);
 router.post('/admin/manual', protect, adminOnly, createManualOrder);

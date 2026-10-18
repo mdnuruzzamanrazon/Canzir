@@ -20,6 +20,7 @@ import {
   CreditCard,
   Percent
 } from 'lucide-react';
+import SalesAnalyticsChart from './SalesAnalyticsChart.jsx';
 
 export default function OverviewTab({
   stats,
@@ -30,7 +31,6 @@ export default function OverviewTab({
   onCreateOrder,
   formatPrice
 }) {
-  const [salesPeriod, setSalesPeriod] = useState('30D');
 
   // Status badge styling helper with glowing dots
   const getOrderStatusBadge = (status) => {
@@ -218,109 +218,12 @@ export default function OverviewTab({
 
       {/* Sales Analytics & Status Breakdown - Full 12-Column Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
-        {/* Sales Overview Chart (8 cols on XL) */}
-        <div className="xl:col-span-8 bg-[#181513]/90 border border-stone-800/90 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h3 className="text-base font-bold text-stone-100 tracking-wide">
-                  Revenue &amp; Sales Velocity
-                </h3>
-                <p className="text-xs text-stone-400 mt-0.5">
-                  Settled transactions, order frequencies, and daily studio performance.
-                </p>
-              </div>
-
-              {/* Period Filter Buttons */}
-              <div className="inline-flex rounded-xl bg-stone-900 p-1 border border-stone-800 text-xs self-start sm:self-auto">
-                {['7D', '30D', '3M', '12M'].map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setSalesPeriod(p)}
-                    className={`px-3.5 py-1.5 rounded-lg transition-all font-semibold cursor-pointer ${
-                      salesPeriod === p
-                        ? 'bg-stone-800 text-[#E6AF68] shadow-sm border border-stone-700/50'
-                        : 'text-stone-400 hover:text-stone-200'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* KPI Metric Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-stone-900/60 border border-stone-800/80 mb-6">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider block">
-                  Total Store Volume
-                </span>
-                <span className="text-base sm:text-lg font-bold font-mono text-stone-100 mt-0.5 block">
-                  {formatPrice(stats?.totalRevenue || 62400)}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider block">
-                  Settled Payments
-                </span>
-                <span className="text-base sm:text-lg font-bold font-mono text-emerald-400 mt-0.5 block">
-                  {formatPrice(stats?.settledRevenue || 15500)}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider block">
-                  Pending Courier Remittance
-                </span>
-                <span className="text-base sm:text-lg font-bold font-mono text-amber-400 mt-0.5 block">
-                  {formatPrice(Math.max(0, (stats?.totalRevenue || 62400) - (stats?.settledRevenue || 15500)))}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider block">
-                  Average Order Value
-                </span>
-                <span className="text-base sm:text-lg font-bold font-mono text-stone-200 mt-0.5 block">
-                  {formatPrice(totalOrdersCount > 0 ? Math.round((stats?.totalRevenue || 62400) / totalOrdersCount) : 4850)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Visual Sales Graph Simulation */}
-          <div className="space-y-4 pt-2">
-            <div className="h-48 flex items-end gap-3 sm:gap-4 px-2 pt-6">
-              {[
-                { label: 'Mon', h: '45%', val: '৳4,500', orders: 1 },
-                { label: 'Tue', h: '65%', val: '৳8,800', orders: 2 },
-                { label: 'Wed', h: '35%', val: '৳3,680', orders: 1 },
-                { label: 'Thu', h: '80%', val: '৳12,400', orders: 3 },
-                { label: 'Fri', h: '55%', val: '৳7,200', orders: 2 },
-                { label: 'Sat', h: '95%', val: '৳18,500', orders: 4, highlight: true },
-                { label: 'Sun', h: '50%', val: '৳6,500', orders: 2 }
-              ].map((bar, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                  <div className="relative w-full flex items-end justify-center h-40 bg-stone-900/50 rounded-t-lg overflow-hidden border-b border-stone-800">
-                    <div
-                      style={{ height: bar.h }}
-                      className={`w-full rounded-t-lg transition-all duration-500 ${
-                        bar.highlight
-                          ? 'bg-gradient-to-t from-[#925F29] to-[#C58B4B] shadow-[0_0_16px_rgba(197,139,75,0.35)]'
-                          : 'bg-stone-800 group-hover:bg-[#C58B4B]/80'
-                      }`}
-                    />
-                    {/* Tooltip on Hover */}
-                    <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-stone-950 text-[11px] text-stone-100 px-2.5 py-1 rounded-lg border border-stone-700 shadow-xl pointer-events-none whitespace-nowrap z-20">
-                      <span className="font-bold text-[#E6AF68]">{bar.val}</span>
-                      <span className="text-stone-400 text-[10px] ml-1">({bar.orders} ord)</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] text-stone-400 font-semibold group-hover:text-stone-200 transition">
-                    {bar.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Real-Time Connected Sales Analytics Chart (8 cols on XL) */}
+        <div className="xl:col-span-8">
+          <SalesAnalyticsChart
+            formatPrice={formatPrice}
+            autoRefreshSignal={orders?.length}
+          />
         </div>
 
         {/* Order Status Breakdown (4 cols on XL) */}

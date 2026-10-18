@@ -861,3 +861,401 @@ export const getOrderStats = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+// 15. Real-Time Sales & Revenue Analytics Chart Engine (Admin)
+export const getSalesAnalytics = async (req, res) => {
+  try {
+    const {
+      range = '30d',
+      startDate: customStart,
+      endDate: customEnd,
+      timezoneOffset = 0
+    } = req.query;
+
+    const tzOffsetMs = Number(timezoneOffset) * 60 * 1000;
+    const now = new Date();
+
+    let startDate, endDate;
+    let priorStartDate, priorEndDate;
+    let interval = 'day'; // 'hour' | 'day' | 'week' | 'month'
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    switch (range.toLowerCase()) {
+      case 'today': {
+        interval = 'hour';
+        startDate = new Date(now);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(now);
+        endDate.setHours(23, 59, 59, 999);
+
+        // Prior: yesterday 00:00 to 23:59
+        priorStartDate = new Date(startDate);
+        priorStartDate.setDate(priorStartDate.getDate() - 1);
+        priorEndDate = new Date(endDate);
+        priorEndDate.setDate(priorEndDate.getDate() - 1);
+        break;
+      }
+      case '7d': {
+        interval = 'day';
+        endDate = new Date(now);
+        endDate.setHours(23, 59, 59, 999);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 6);
+        startDate.setHours(0, 0, 0, 0);
+
+        priorEndDate = new Date(startDate.getTime() - 1);
+        priorStartDate = new Date(priorEndDate);
+        priorStartDate.setDate(priorStartDate.getDate() - 6);
+        priorStartDate.setHours(0, 0, 0, 0);
+        break;
+      }
+      case '30d': {
+        interval = 'day';
+        endDate = new Date(now);
+        endDate.setHours(23, 59, 59, 999);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 29);
+        startDate.setHours(0, 0, 0, 0);
+
+        priorEndDate = new Date(startDate.getTime() - 1);
+        priorStartDate = new Date(priorEndDate);
+        priorStartDate.setDate(priorStartDate.getDate() - 29);
+        priorStartDate.setHours(0, 0, 0, 0);
+        break;
+      }
+      case 'this_month': {
+        interval = 'day';
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        priorStartDate = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+        priorEndDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+        break;
+      }
+      case 'last_month': {
+        interval = 'day';
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+        priorStartDate = new Date(now.getFullYear(), now.getMonth() - 2, 1, 0, 0, 0, 0);
+        priorEndDate = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59, 999);
+        break;
+      }
+      case '3m': {
+        interval = 'week';
+        endDate = new Date(now);
+        endDate.setHours(23, 59, 59, 999);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 89);
+        startDate.setHours(0, 0, 0, 0);
+
+        priorEndDate = new Date(startDate.getTime() - 1);
+        priorStartDate = new Date(priorEndDate);
+        priorStartDate.setDate(priorStartDate.getDate() - 89);
+        priorStartDate.setHours(0, 0, 0, 0);
+        break;
+      }
+      case '12m': {
+        interval = 'month';
+        startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1, 0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        priorStartDate = new Date(now.getFullYear() - 1, now.getMonth() - 11, 1, 0, 0, 0, 0);
+        priorEndDate = new Date(now.getFullYear() - 1, now.getMonth() + 1, 0, 23, 59, 59, 999);
+        break;
+      }
+      case 'custom': {
+        if (!customStart || !customEnd) {
+          return res.status(400).json({ success: false, message: 'startDate and endDate required for custom range' });
+        }
+        startDate = new Date(customStart);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(customEnd);
+        endDate.setHours(23, 59, 59, 999);
+
+        const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 2) interval = 'hour';
+        else if (diffDays <= 45) interval = 'day';
+        else if (diffDays <= 180) interval = 'week';
+        else interval = 'month';
+
+        const diffMs = endDate.getTime() - startDate.getTime();
+        priorEndDate = new Date(startDate.getTime() - 1);
+        priorStartDate = new Date(priorEndDate.getTime() - diffMs);
+        break;
+      }
+      default: {
+        interval = 'day';
+        endDate = new Date(now);
+        endDate.setHours(23, 59, 59, 999);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 29);
+        startDate.setHours(0, 0, 0, 0);
+
+        priorEndDate = new Date(startDate.getTime() - 1);
+        priorStartDate = new Date(priorEndDate);
+        priorStartDate.setDate(priorStartDate.getDate() - 29);
+        priorStartDate.setHours(0, 0, 0, 0);
+        break;
+      }
+    }
+
+    // 1. Build Pre-Populated Continuous Timeline Buckets
+    const buckets = [];
+
+    if (interval === 'hour') {
+      const cur = new Date(startDate);
+      while (cur <= endDate) {
+        const h = cur.getHours();
+        const hStr = h.toString().padStart(2, '0') + ':00';
+        buckets.push({
+          key: cur.toISOString().slice(0, 13), // YYYY-MM-DDTHH
+          startTime: new Date(cur),
+          endTime: new Date(cur.getTime() + 3600000 - 1),
+          label: `${hStr} - ${h.toString().padStart(2, '0')}:59`,
+          shortLabel: hStr,
+          revenue: 0,
+          settledRevenue: 0,
+          unitsSold: 0,
+          ordersCount: 0,
+          topProducts: []
+        });
+        cur.setHours(cur.getHours() + 1);
+      }
+    } else if (interval === 'day') {
+      const cur = new Date(startDate);
+      while (cur <= endDate) {
+        const y = cur.getFullYear();
+        const m = (cur.getMonth() + 1).toString().padStart(2, '0');
+        const d = cur.getDate().toString().padStart(2, '0');
+        const key = `${y}-${m}-${d}`;
+        const dayName = dayNames[cur.getDay()];
+        const monthName = monthNames[cur.getMonth()];
+        const dayStart = new Date(cur);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(cur);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        buckets.push({
+          key,
+          startTime: dayStart,
+          endTime: dayEnd,
+          label: `${dayName}, ${monthName} ${cur.getDate()}, ${y}`,
+          shortLabel: `${monthName} ${cur.getDate()}`,
+          revenue: 0,
+          settledRevenue: 0,
+          unitsSold: 0,
+          ordersCount: 0,
+          topProducts: []
+        });
+        cur.setDate(cur.getDate() + 1);
+      }
+    } else if (interval === 'week') {
+      const cur = new Date(startDate);
+      while (cur <= endDate) {
+        const endWeek = new Date(cur);
+        endWeek.setDate(endWeek.getDate() + 6);
+        endWeek.setHours(23, 59, 59, 999);
+        if (endWeek > endDate) endWeek.setTime(endDate.getTime());
+
+        const startMonth = monthNames[cur.getMonth()];
+        const endMonth = monthNames[endWeek.getMonth()];
+        const key = cur.toISOString().slice(0, 10);
+
+        buckets.push({
+          key,
+          startTime: new Date(cur),
+          endTime: endWeek,
+          label: `Week: ${startMonth} ${cur.getDate()} – ${endMonth} ${endWeek.getDate()}`,
+          shortLabel: `${startMonth} ${cur.getDate()}`,
+          revenue: 0,
+          settledRevenue: 0,
+          unitsSold: 0,
+          ordersCount: 0,
+          topProducts: []
+        });
+        cur.setDate(cur.getDate() + 7);
+        cur.setHours(0, 0, 0, 0);
+      }
+    } else if (interval === 'month') {
+      const cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1, 0, 0, 0, 0);
+      while (cur <= endDate) {
+        const y = cur.getFullYear();
+        const mIdx = cur.getMonth();
+        const key = `${y}-${(mIdx + 1).toString().padStart(2, '0')}`;
+        const endMonth = new Date(y, mIdx + 1, 0, 23, 59, 59, 999);
+
+        buckets.push({
+          key,
+          startTime: new Date(cur),
+          endTime: endMonth,
+          label: `${monthNames[mIdx]} ${y}`,
+          shortLabel: `${monthNames[mIdx]}`,
+          revenue: 0,
+          settledRevenue: 0,
+          unitsSold: 0,
+          ordersCount: 0,
+          topProducts: []
+        });
+        cur.setMonth(cur.getMonth() + 1);
+      }
+    }
+
+    // 2. Fetch Actual Orders for Current and Prior Windows
+    const [currentOrders, priorOrders, cancelledOrders] = await Promise.all([
+      Order.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+        orderStatus: { $ne: 'Cancelled' }
+      }).lean(),
+      Order.find({
+        createdAt: { $gte: priorStartDate, $lte: priorEndDate },
+        orderStatus: { $ne: 'Cancelled' }
+      }).lean(),
+      Order.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+        orderStatus: 'Cancelled'
+      }).lean()
+    ]);
+
+    // 3. Compute Current Period Metrics
+    let grossRevenue = 0;
+    let settledRevenue = 0;
+    let totalUnitsSold = 0;
+    const productSalesMap = {};
+
+    currentOrders.forEach(order => {
+      const amount = order.totalAmount || 0;
+      grossRevenue += amount;
+
+      const isSettled = ['paid', 'verified'].includes(order.paymentStatus?.toLowerCase());
+      if (isSettled) {
+        settledRevenue += amount;
+      }
+
+      const orderTime = new Date(order.createdAt).getTime();
+
+      // Find matching bucket
+      const targetBucket = buckets.find(b => {
+        return orderTime >= b.startTime.getTime() && orderTime <= b.endTime.getTime();
+      });
+
+      let orderUnits = 0;
+      if (Array.isArray(order.items)) {
+        order.items.forEach(it => {
+          const qty = it.quantity || 1;
+          orderUnits += qty;
+          totalUnitsSold += qty;
+
+          // Track top products
+          const prodKey = it.title || 'Artisan Fixture';
+          if (!productSalesMap[prodKey]) {
+            productSalesMap[prodKey] = {
+              title: it.title || 'Artisan Fixture',
+              image: it.image || '/assets/products/bamboo-lattice-table-lamp.jpeg',
+              price: it.price || 0,
+              unitsSold: 0,
+              revenue: 0,
+              ordersCount: 0
+            };
+          }
+          productSalesMap[prodKey].unitsSold += qty;
+          productSalesMap[prodKey].revenue += (it.price || 0) * qty;
+          productSalesMap[prodKey].ordersCount += 1;
+        });
+      }
+
+      if (targetBucket) {
+        targetBucket.revenue += amount;
+        if (isSettled) {
+          targetBucket.settledRevenue += amount;
+        }
+        targetBucket.unitsSold += orderUnits;
+        targetBucket.ordersCount += 1;
+      }
+    });
+
+    // 4. Compute Prior Period Metrics for Growth Comparison
+    let priorGrossRevenue = 0;
+    let priorSettledRevenue = 0;
+    let priorUnitsSold = 0;
+
+    priorOrders.forEach(order => {
+      priorGrossRevenue += (order.totalAmount || 0);
+      if (['paid', 'verified'].includes(order.paymentStatus?.toLowerCase())) {
+        priorSettledRevenue += (order.totalAmount || 0);
+      }
+      if (Array.isArray(order.items)) {
+        order.items.forEach(it => {
+          priorUnitsSold += (it.quantity || 1);
+        });
+      }
+    });
+
+    // Growth calculation helper (% with 1 decimal)
+    const calcGrowth = (curr, prev) => {
+      if (!prev || prev === 0) return curr > 0 ? 100 : 0;
+      return Math.round(((curr - prev) / prev) * 1000) / 10;
+    };
+
+    const topProducts = Object.values(productSalesMap)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const pendingRemittance = Math.max(0, grossRevenue - settledRevenue);
+    const averageOrderValue = currentOrders.length > 0 ? Math.round(grossRevenue / currentOrders.length) : 0;
+    const priorAOV = priorOrders.length > 0 ? Math.round(priorGrossRevenue / priorOrders.length) : 0;
+
+    // Format clean timeline data
+    const timeline = buckets.map(b => ({
+      key: b.key,
+      label: b.label,
+      shortLabel: b.shortLabel,
+      timestamp: b.startTime.toISOString(),
+      revenue: b.revenue,
+      settledRevenue: b.settledRevenue,
+      unitsSold: b.unitsSold,
+      ordersCount: b.ordersCount
+    }));
+
+    return res.json({
+      success: true,
+      range,
+      interval,
+      dateRange: {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        priorStartDate: priorStartDate.toISOString(),
+        priorEndDate: priorEndDate.toISOString()
+      },
+      summary: {
+        grossRevenue,
+        settledRevenue,
+        pendingRemittance,
+        unitsSold: totalUnitsSold,
+        ordersCount: currentOrders.length,
+        averageOrderValue,
+        cancelledCount: cancelledOrders.length,
+        cancelledRevenue: cancelledOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0)
+      },
+      comparison: {
+        priorGrossRevenue,
+        revenueGrowth: calcGrowth(grossRevenue, priorGrossRevenue),
+        priorSettledRevenue,
+        settledGrowth: calcGrowth(settledRevenue, priorSettledRevenue),
+        priorUnitsSold,
+        unitsGrowth: calcGrowth(totalUnitsSold, priorUnitsSold),
+        priorOrdersCount: priorOrders.length,
+        ordersGrowth: calcGrowth(currentOrders.length, priorOrders.length),
+        priorAverageOrderValue: priorAOV,
+        aovGrowth: calcGrowth(averageOrderValue, priorAOV)
+      },
+      timeline,
+      topProducts
+    });
+  } catch (error) {
+    console.error('[getSalesAnalytics Error]', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
